@@ -53,8 +53,7 @@ locals {
 }
 
 resource "aws_instance" "web" {
-  for_each = local.instances[terraform.workspace]
-  instance_type = each.value
+  instance_type = "t2.small"
   ami = data.aws_ami.ubuntu.id
   tags = {
     Name = "HelloNetology"
@@ -63,6 +62,18 @@ resource "aws_instance" "web" {
     create_before_destroy = true
   }
 }
+
+//resource "aws_instance" "web" {
+//  for_each = local.instances[terraform.workspace]
+//  instance_type = each.value
+//  ami = data.aws_ami.ubuntu.id
+//  tags = {
+//    Name = "HelloNetology"
+//  }
+//  lifecycle {
+//    create_before_destroy = true
+//  }
+//}
 
 //resource "aws_instance" "web" {
 //  count = local.vm_count[terraform.workspace]
