@@ -1,0 +1,19 @@
+version: 3
+automerge: true
+projects:
+
+  - name: atlantis-test
+    dir: .
+    workspace: stage
+    terraform_version: v0.11.0
+    autoplan:
+      when_modified: ["*.tf"]
+      enabled: true
+
+  - name: atlantis-test
+    dir: .
+    workspace: prod
+    terraform_version: v0.11.0
+    autoplan:
+      when_modified: ["*.tf"]
+      enabled: true
