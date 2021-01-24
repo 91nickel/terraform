@@ -11,26 +11,30 @@ data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    name = "name"
+    values = [
+      "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
   filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+    name = "virtualization-type"
+    values = [
+      "hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  owners = [
+    "099720109477"]
+  # Canonical
 }
 
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
-data aws_instance "web" {
-  for_each = local.instances[terraform.workspace]
-  instance_id = aws_instance.web[each.key].id
-}
+//data aws_instance "web" {
+//  for_each = local.instances[terraform.workspace]
+//  instance_id = aws_instance.web[each.key].id
+//}
 
 locals {
   vm_count = {
@@ -39,35 +43,53 @@ locals {
     default = "1"
   }
   vm_instance_type = {
-    prod = "t2.small"
-    stage = "t2.small"
-    default = "t2.small"
+    prod = "t2.micro"
+    stage = "t2.micro"
+    default = "t2.micro"
   }
   instances = {
     default = {
-      0 = "t2.small"
+      0 = "t2.micro"
     }
     stage = {
-      0 = "t2.small"
+      0 = "t2.micro"
     }
     prod = {
-      0 = "t2.small"
-      1 = "t2.small"
+      0 = "t2.micro"
+      1 = "t2.micro"
     }
   }
 }
 
-resource "aws_instance" "web" {
-  for_each = local.instances[terraform.workspace]
-  instance_type = each.value
+module "ec2_cluster" {
+  source = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 2.0"
+
+  name = "web"
+  instance_count = 1
+
   ami = data.aws_ami.ubuntu.id
+  instance_type = "t2.micro"
+  monitoring = true
+  subnet_id = "subnet-2f804865"
+
   tags = {
-    Name = "HelloNetology"
-  }
-  lifecycle {
-    create_before_destroy = true
+    Terraform = "true"
+    Environment = "dev"
   }
 }
+
+//resource "aws_instance" "web" {
+//  for_each = local.instances[terraform.workspace]
+//  instance_type = each.value
+//  ami = data.aws_ami.ubuntu.id
+//  tags = {
+//    Name = "HelloNetology"
+//  }
+//  lifecycle {
+//    create_before_destroy = true
+//  }
+//}
 
 //resource "aws_instance" "web" {
 //  count = local.vm_count[terraform.workspace]
