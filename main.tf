@@ -36,14 +36,19 @@ locals {
   vm_count = {
     prod = "2"
     stage = "1"
+    default = "1"
   }
   vm_instance_type = {
     prod = "t2.small"
-    stage = "t2.micro"
+    stage = "t2.small"
+    default = "t2.small"
   }
   instances = {
+    default = {
+      0 = "t2.small"
+    }
     stage = {
-      0 = "t2.micro"
+      0 = "t2.small"
     }
     prod = {
       0 = "t2.small"
@@ -53,7 +58,8 @@ locals {
 }
 
 resource "aws_instance" "web" {
-  instance_type = "t2.small"
+  for_each = local.instances[terraform.workspace]
+  instance_type = each.value
   ami = data.aws_ami.ubuntu.id
   tags = {
     Name = "HelloNetology"
@@ -62,18 +68,6 @@ resource "aws_instance" "web" {
     create_before_destroy = true
   }
 }
-
-//resource "aws_instance" "web" {
-//  for_each = local.instances[terraform.workspace]
-//  instance_type = each.value
-//  ami = data.aws_ami.ubuntu.id
-//  tags = {
-//    Name = "HelloNetology"
-//  }
-//  lifecycle {
-//    create_before_destroy = true
-//  }
-//}
 
 //resource "aws_instance" "web" {
 //  count = local.vm_count[terraform.workspace]
